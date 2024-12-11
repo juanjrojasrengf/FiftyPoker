@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.fiftypoker.controllers.GameViewController" style="-fx-background-image: url('/com/example/fiftypoker/background.jpg'); -fx-background-size: cover;">
+    <!-- Tablero central -->
+    <center>
+        <VBox alignment="CENTER" spacing="10">
+            <Label fx:id="tableSumLabel" text="Suma actual: 0" style="-fx-font-size: 18px;" />
+            <ImageView fx:id="activeCardImage" fitWidth="100" fitHeight="150" />
+        </VBox>
+    </center>
+
+    <!-- Zona de cartas del jugador humano -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="10" style="-fx-padding: 10;">
+            <Label text="Tus cartas:" style="-fx-font-size: 16px;" />
+            <HBox fx:id="playerCardsBox" spacing="5" />
+        </HBox>
+    </bottom>
+
+    <!-- Botones de acción -->
+    <top>
+        <HBox alignment="CENTER" spacing="20" style="-fx-padding: 10;">
+            <Button fx:id="playCardButton" text="Jugar Carta" />
+            <Button fx:id="endTurnButton" text="Terminar Turno" />
+        </HBox>
+    </top>
+
+    <!-- Zona de jugadores máquina -->
+    <right>
+        <VBox alignment="CENTER" spacing="20" style="-fx-padding: 10;">
+            <Label text="Jugadores Máquina" style="-fx-font-size: 16px;" />
+            <VBox fx:id="machinePlayersBox" spacing="10" />
+        </VBox>
+    </right>
+</BorderPane>
