@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.fiftypoker.controllers.GameViewController" style="-fx-background-image: url('/com/example/fiftypoker/background.jpg'); -fx-background-size: cover;">
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.fiftypoker.controllers.GameViewController" style="-fx-background-image: url('/com/example/fiftypoker/background.png'); -fx-background-size: cover;">
     <!-- Tablero central -->
     <center>
         <VBox alignment="CENTER" spacing="10">

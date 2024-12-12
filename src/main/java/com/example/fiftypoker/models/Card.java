@@ -17,11 +17,11 @@ public class Card {
 
     private int calculateValue(String rank) {
         switch (rank) {
-            case "A":
+            case "ACE":
                 return 1; // El valor 10 se manejará lógicamente según convenga
-            case "J":
-            case "Q":
-            case "K":
+            case "JACK":
+            case "QUEEN":
+            case "KING":
                 return -10;
             case "9":
                 return 0;
