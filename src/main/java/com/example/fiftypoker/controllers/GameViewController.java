@@ -1,19 +1,18 @@
 package com.example.fiftypoker.controllers;
 
-import com.example.fiftypoker.models.*;
+import com.example.fiftypoker.models.Card;
+import com.example.fiftypoker.models.Player;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 import java.io.InputStream;
 
-/**
- * Controlador para manejar la vista del juego "FiftyPoker".
- */
 public class GameViewController {
 
     @FXML
@@ -23,42 +22,84 @@ public class GameViewController {
     private ImageView activeCardImage;
 
     @FXML
+    private ImageView backgroundImage;
+
+    @FXML
+    private ImageView tableImage;
+
+    @FXML
+    private ImageView deckBackImage;
+
+    @FXML
     private HBox playerCardsBox;
 
     @FXML
-    private VBox machinePlayersBox;
+    private VBox machineLeftBox;
 
     @FXML
-    private Button playCardButton;
+    private HBox machineTopBox;
 
     @FXML
-    private Button endTurnButton;
+    private VBox machineRightBox;
 
     private GameController gameController;
 
-    public void initialize() {
-        // Inicializar el controlador del juego con 2 jugadores máquina
-        gameController = new GameController(2);
+    @FXML
+    private void initialize() {
+        // Configurar el controlador del juego con 3 jugadores máquina
+        gameController = new GameController(3);
+        setBackgroundAndTableImages();
         updateView();
+        configureTurnSystem();
     }
 
-    @FXML
-    private void onPlayCardButtonClicked() {
+    private void setBackgroundAndTableImages() {
         try {
-            gameController.playTurn(0);
-            updateView();
-        } catch (IllegalStateException e) {
-            System.out.println("No se puede jugar esta carta: " + e.getMessage());
+            // Cargar el fondo
+            InputStream backgroundStream = getClass().getResourceAsStream("/com/example/fiftypoker/background.png");
+            if (backgroundStream != null) {
+                backgroundImage.setImage(new Image(backgroundStream));
+            }
+
+            // Cargar el tablero (mesa)
+            InputStream tableStream = getClass().getResourceAsStream("/com/example/fiftypoker/Table.png");
+            if (tableStream != null) {
+                tableImage.setImage(new Image(tableStream));
+            }
+
+            // Cargar la carta volteada (parte trasera de las cartas)
+            InputStream cardBackStream = getClass().getResourceAsStream("/com/example/fiftypoker/cardback.png");
+            if (cardBackStream != null) {
+                deckBackImage.setImage(new Image(cardBackStream));
+            }
+        } catch (Exception e) {
+            System.out.println("Error al cargar las imágenes: " + e.getMessage());
         }
     }
 
     @FXML
-    private void onEndTurnButtonClicked() {
-        try {
-            gameController.playMachineTurn();
-            updateView();
-        } catch (IllegalStateException e) {
-            System.out.println("Error al terminar el turno: " + e.getMessage());
+    private void onCardDoubleClicked(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            ImageView cardView = (ImageView) event.getSource();
+            int index = playerCardsBox.getChildren().indexOf(cardView);
+            if (gameController.isCurrentPlayerHuman()) {
+                gameController.playTurn(index);
+                updateView();
+            } else {
+                System.out.println("No es el turno del jugador humano.");
+            }
+        }
+    }
+
+    @FXML
+    private void onDeckDoubleClicked(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            if (gameController.isCurrentPlayerHuman()) {
+                gameController.takeCardFromDeck();
+                updateView();
+            } else {
+                System.out.println("No es el turno del jugador humano.");
+            }
         }
     }
 
@@ -69,32 +110,59 @@ public class GameViewController {
         // Actualizar la carta activa en la mesa
         Card activeCard = gameController.getTable().getActiveCard();
         if (activeCard != null) {
-            setImageToImageView(activeCardImage, activeCard);
+            activeCardImage.setImage(new Image(getClass().getResourceAsStream(
+                    "/com/example/fiftypoker/" + activeCard.getRank().toLowerCase() + "_of_" + activeCard.getSuit() + ".png")));
         }
 
         // Actualizar las cartas del jugador humano
         playerCardsBox.getChildren().clear();
         Player humanPlayer = gameController.getPlayers().get(0);
-        for (Card card : humanPlayer.getHand()) {
-            ImageView cardImage = new ImageView();
-            setImageToImageView(cardImage, card);
-            cardImage.setFitWidth(60);
-            cardImage.setFitHeight(90);
+        for (int i = 0; i < humanPlayer.getHand().size(); i++) {
+            Card card = humanPlayer.getHand().get(i);
+            ImageView cardImage = new ImageView(new Image(getClass().getResourceAsStream(
+                    "/com/example/fiftypoker/" + card.getRank().toLowerCase() + "_of_" + card.getSuit() + ".png")));
+            cardImage.setFitWidth(80);
+            cardImage.setFitHeight(120);
+            cardImage.setOnMouseClicked(this::onCardDoubleClicked);
             playerCardsBox.getChildren().add(cardImage);
+        }
+
+        // Actualizar las cartas de los jugadores máquina
+        updateMachineBox(machineLeftBox, 1);
+        updateMachineBox(machineTopBox, 2);
+        updateMachineBox(machineRightBox, 3);
+    }
+
+    private void updateMachineBox(Pane machineBox, int playerIndex) {
+        if (playerIndex < gameController.getPlayers().size()) {
+            machineBox.getChildren().clear(); // Limpia las cartas existentes
+            Player machinePlayer = gameController.getPlayers().get(playerIndex);
+
+            // Añade las cartas del jugador máquina
+            for (int j = 0; j < machinePlayer.getHand().size(); j++) {
+                ImageView backCardImage = new ImageView(new Image(getClass().getResourceAsStream("/com/example/fiftypoker/cardback.png")));
+                backCardImage.setFitWidth(80);
+                backCardImage.setFitHeight(120);
+                machineBox.getChildren().add(backCardImage);
+            }
+        } else {
+            machineBox.getChildren().clear(); // Si no hay jugador, deja vacío el contenedor
         }
     }
 
-    private void setImageToImageView(ImageView imageView, Card card) {
-        try {
-            String resourcePath = "/com/example/fiftypoker/" + card.getRank().toLowerCase() + "_of_" + card.getSuit() + ".png";
-            InputStream inputStream = getClass().getResourceAsStream(resourcePath);
-            if (inputStream != null) {
-                imageView.setImage(new Image(inputStream));
-            } else {
-                System.out.println("Recurso no encontrado: " + resourcePath);
+    private void configureTurnSystem() {
+        new Thread(() -> {
+            while (!gameController.isGameOver()) {
+                if (!gameController.isCurrentPlayerHuman()) {
+                    try {
+                        Thread.sleep(4000); // Simular tiempo de respuesta de la máquina
+                        gameController.playMachineTurn();
+                        updateView();
+                    } catch (InterruptedException e) {
+                        System.out.println("Error en el sistema de turnos: " + e.getMessage());
+                    }
+                }
             }
-        } catch (Exception e) {
-            System.out.println("Error al cargar la imagen: " + e.getMessage());
-        }
+        }).start();
     }
 }

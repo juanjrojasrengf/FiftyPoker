@@ -9,31 +9,45 @@ import java.util.List;
 public class Table {
     private Card activeCard; // Última carta jugada en la mesa
     private int currentSum; // Suma actual en la mesa
-    private List<Card> playedCards; // Cartas jugadas
+    private List<Card> playedCards; // Cartas jugadas en la mesa
 
     public Table() {
         this.playedCards = new ArrayList<>();
         this.currentSum = 0;
     }
 
+    /**
+     * Juega una carta en la mesa y actualiza la suma.
+     * @param card Carta a jugar.
+     */
     public void playCard(Card card) {
-        if (currentSum + card.getValue() > 50) {
+        int newSum = currentSum + card.getValue();
+        if (newSum > 50) {
             throw new IllegalStateException("La suma de la mesa no puede exceder 50.");
         }
         activeCard = card;
         playedCards.add(card);
-        currentSum += card.getValue();
+        currentSum = newSum;
     }
 
+    /**
+     * Reinicia la mesa conservando solo la última carta jugada.
+     */
     public void resetTable() {
-        if (playedCards.size() > 1) {
-            Card lastCard = playedCards.remove(playedCards.size() - 1); // Mantener la última carta
+        if (!playedCards.isEmpty()) {
+            Card lastCard = playedCards.remove(playedCards.size() - 1);
             playedCards.clear();
             playedCards.add(lastCard);
+            currentSum = lastCard.getValue();
+        } else {
+            currentSum = 0;
         }
-        currentSum = activeCard != null ? activeCard.getValue() : 0;
     }
 
+    /**
+     * Recolecta todas las cartas jugadas excepto la última.
+     * @return Lista de cartas recolectadas.
+     */
     public List<Card> collectPlayedCards() {
         List<Card> collectedCards = new ArrayList<>(playedCards);
         resetTable();

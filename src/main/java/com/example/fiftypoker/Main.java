@@ -16,7 +16,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/fiftypoker/GameView.fxml"));
         Parent root = loader.load();
 
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1000, 700);
         primaryStage.setTitle("FiftyPoker - Juego de Cartas");
         primaryStage.setScene(scene);
         primaryStage.show();
