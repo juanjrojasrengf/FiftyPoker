@@ -9,8 +9,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
  * Controlador para manejar la vista del juego "FiftyPoker".
@@ -18,7 +17,7 @@ import java.io.FileNotFoundException;
 public class GameViewController {
 
     @FXML
-    private Label tableSumLabel; // Cambiado de Text a Label
+    private Label tableSumLabel;
 
     @FXML
     private ImageView activeCardImage;
@@ -38,7 +37,7 @@ public class GameViewController {
     private GameController gameController;
 
     public void initialize() {
-        // Inicializar el controlador del juego con 2 jugadores máquina (por ejemplo)
+        // Inicializar el controlador del juego con 2 jugadores máquina
         gameController = new GameController(2);
         updateView();
     }
@@ -46,7 +45,6 @@ public class GameViewController {
     @FXML
     private void onPlayCardButtonClicked() {
         try {
-            // Por defecto, jugar la primera carta (esto se adaptará a la selección en la UI)
             gameController.playTurn(0);
             updateView();
         } catch (IllegalStateException e) {
@@ -71,25 +69,32 @@ public class GameViewController {
         // Actualizar la carta activa en la mesa
         Card activeCard = gameController.getTable().getActiveCard();
         if (activeCard != null) {
-            try {
-                activeCardImage.setImage(new Image(new FileInputStream("/com/example/fiftypoker/" + activeCard.getRank().toLowerCase() + "_of_" + activeCard.getSuit() + ".png")));
-            } catch (FileNotFoundException e) {
-                System.out.println("Imagen no encontrada: " + e.getMessage());
-            }
+            setImageToImageView(activeCardImage, activeCard);
         }
 
         // Actualizar las cartas del jugador humano
         playerCardsBox.getChildren().clear();
         Player humanPlayer = gameController.getPlayers().get(0);
         for (Card card : humanPlayer.getHand()) {
-            try {
-                ImageView cardImage = new ImageView(new Image(new FileInputStream("/com/example/fiftypoker/" + card.getRank().toLowerCase() + "_of_" + card.getSuit() + ".png")));
-                cardImage.setFitWidth(60);
-                cardImage.setFitHeight(90);
-                playerCardsBox.getChildren().add(cardImage);
-            } catch (FileNotFoundException e) {
-                System.out.println("Imagen no encontrada: " + e.getMessage());
+            ImageView cardImage = new ImageView();
+            setImageToImageView(cardImage, card);
+            cardImage.setFitWidth(60);
+            cardImage.setFitHeight(90);
+            playerCardsBox.getChildren().add(cardImage);
+        }
+    }
+
+    private void setImageToImageView(ImageView imageView, Card card) {
+        try {
+            String resourcePath = "/com/example/fiftypoker/" + card.getRank().toLowerCase() + "_of_" + card.getSuit() + ".png";
+            InputStream inputStream = getClass().getResourceAsStream(resourcePath);
+            if (inputStream != null) {
+                imageView.setImage(new Image(inputStream));
+            } else {
+                System.out.println("Recurso no encontrado: " + resourcePath);
             }
+        } catch (Exception e) {
+            System.out.println("Error al cargar la imagen: " + e.getMessage());
         }
     }
 }
