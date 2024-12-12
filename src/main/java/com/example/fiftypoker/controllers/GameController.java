@@ -32,6 +32,7 @@ public class GameController {
 
         // Repartir cartas iniciales
         dealInitialCards();
+
         // Colocar la primera carta en la mesa
         table.playCard(deck.drawCard());
     }
@@ -39,6 +40,9 @@ public class GameController {
     private void dealInitialCards() {
         for (Player player : players) {
             for (int i = 0; i < 4; i++) {
+                if (deck.getRemainingCards() == 0) {
+                    recycleCardsFromTable();
+                }
                 player.addCardToHand(deck.drawCard());
             }
         }
@@ -57,7 +61,10 @@ public class GameController {
             table.playCard(playedCard);
             System.out.println(currentPlayer.getName() + " jugó " + playedCard);
 
-            // Tomar una nueva carta del mazo
+            // Tomar una nueva carta del mazo si es posible
+            if (deck.getRemainingCards() == 0) {
+                recycleCardsFromTable();
+            }
             if (deck.getRemainingCards() > 0) {
                 currentPlayer.addCardToHand(deck.drawCard());
             }
@@ -75,7 +82,35 @@ public class GameController {
         checkGameOver();
 
         // Pasar al siguiente turno
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        if (!gameOver) {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        }
+    }
+
+    public void takeCardFromDeck() {
+        if (gameOver) {
+            throw new IllegalStateException("El juego ha terminado.");
+        }
+
+        Player currentPlayer = players.get(currentPlayerIndex);
+        if (deck.getRemainingCards() == 0) {
+            recycleCardsFromTable();
+        }
+        if (deck.getRemainingCards() > 0) {
+            currentPlayer.addCardToHand(deck.drawCard());
+        } else {
+            System.out.println("No hay más cartas en el mazo.");
+        }
+    }
+
+    private void recycleCardsFromTable() {
+        List<Card> recycledCards = table.collectPlayedCards();
+        System.out.println("Reutilizando cartas de la mesa: " + recycledCards.size() + " cartas.");
+        deck.addCardsToDeck(recycledCards);
+    }
+
+    public boolean isCurrentPlayerHuman() {
+        return players.get(currentPlayerIndex).getName().equals("Humano");
     }
 
     private void eliminatePlayer(Player player) {
@@ -98,7 +133,7 @@ public class GameController {
 
         Player machinePlayer = players.get(currentPlayerIndex);
         try {
-            Thread.sleep(new Random().nextInt(2000) + 2000); // Funcion para simular un tiempo de respuesta
+            Thread.sleep(new Random().nextInt(2000) + 2000); // Simula tiempo de respuesta
             for (int i = 0; i < machinePlayer.getHand().size(); i++) {
                 Card card = machinePlayer.getHand().get(i);
                 if (table.getCurrentSum() + card.getValue() <= 50) {
