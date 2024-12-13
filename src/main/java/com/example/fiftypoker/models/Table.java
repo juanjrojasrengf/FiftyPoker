@@ -21,7 +21,11 @@ public class Table {
      * @param card Carta a jugar.
      */
     public void playCard(Card card) {
-        int newSum = currentSum + card.getValue();
+        int cardValue = card.getValue();
+        if ("ACE".equals(card.getRank())) {
+            cardValue = (currentSum + 10 > 50) ? 1 : 10;
+        }
+        int newSum = currentSum + cardValue;
         if (newSum > 50) {
             throw new IllegalStateException("La suma de la mesa no puede exceder 50.");
         }

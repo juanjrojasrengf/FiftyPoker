@@ -1,5 +1,7 @@
 package com.example.fiftypoker.models;
 
+import com.example.fiftypoker.controllers.GameController;
+
 /**
  * Representa una carta en el juego "Cincuentazo".
  */
@@ -18,7 +20,7 @@ public class Card {
     private int calculateValue(String rank) {
         switch (rank) {
             case "ACE":
-                return 1; // El valor 10 se manejará lógicamente según convenga
+                return 10; // El valor 10 es el valor por defecto del As, al ser jugado su valor se acoplará automaticamente
             case "JACK":
             case "QUEEN":
             case "KING":
