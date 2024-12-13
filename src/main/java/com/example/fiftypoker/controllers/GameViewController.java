@@ -2,6 +2,7 @@ package com.example.fiftypoker.controllers;
 
 import com.example.fiftypoker.models.Card;
 import com.example.fiftypoker.models.Player;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -11,7 +12,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javafx.event.ActionEvent;
 import java.io.InputStream;
 
@@ -49,9 +52,11 @@ public class GameViewController {
     @FXML
     private ComboBox<String> machineCountComboBox;
 
+    private ScheduledExecutorService scheduler;
+
     @FXML
     private void initialize() {
-        // Configurar el controlador del juego con 3 jugadores máquina
+        scheduler = Executors.newScheduledThreadPool(1); // Inicializar el scheduler aquí
         configureGame(0);
         machineCountComboBox.getItems().clear();
         machineCountComboBox.getItems().addAll("1", "2", "3");
@@ -90,7 +95,7 @@ public class GameViewController {
             int index = playerCardsBox.getChildren().indexOf(cardView);
             if (gameController.isCurrentPlayerHuman()) {
                 gameController.playTurn(index);
-                updateView();
+                Platform.runLater(this::updateView);
             } else {
                 System.out.println("No es el turno del jugador humano.");
             }
@@ -102,7 +107,7 @@ public class GameViewController {
         if (event.getClickCount() == 2) {
             if (gameController.isCurrentPlayerHuman()) {
                 gameController.takeCardFromDeck();
-                updateView();
+                Platform.runLater(this::updateView);
             } else {
                 System.out.println("No es el turno del jugador humano.");
             }
@@ -157,26 +162,26 @@ public class GameViewController {
     }
 
     private void configureTurnSystem() {
-        new Thread(() -> {
-            while (!gameController.isGameOver()) {
-                if (!gameController.isCurrentPlayerHuman()) {
-                    try {
-                        gameController.playMachineTurn();
-                        updateView();
-                        Thread.sleep(1000); // Espera para que se vea el cambio de turno
-                    } catch (InterruptedException e) {
-                        System.out.println("Error en el sistema de turnos: " + e.getMessage());
-                    }
+        scheduler.scheduleAtFixedRate(() -> {
+            if (!gameController.isCurrentPlayerHuman() && !gameController.isGameOver()) {
+                try {
+                    gameController.playMachineTurn();
+                    Platform.runLater(this::updateView);
+                } catch (Exception e) {
+                    System.out.println("Error en el sistema de turnos: " + e.getMessage());
                 }
+            } else if (gameController.isGameOver()) {
+                scheduler.shutdown(); // Detener el scheduler cuando el juego haya terminado
             }
-        }).start();
+        }, 0, 4, TimeUnit.SECONDS); // Ejecutar cada 4 segundos
     }
 
     public void configureGame(int numberOfMachinePlayers) {
         gameController = new GameController(numberOfMachinePlayers);
-        updateView();
+        Platform.runLater(this::updateView);
         configureTurnSystem();
     }
+
     @FXML
     private void onSelectNumberOfMachines(ActionEvent event) {
         String selectedValue = machineCountComboBox.getValue();
