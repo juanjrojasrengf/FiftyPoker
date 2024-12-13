@@ -1,5 +1,6 @@
 package com.example.fiftypoker;
 
+import com.example.fiftypoker.view.GameStage;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,13 +14,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/fiftypoker/GameView.fxml"));
-        Parent root = loader.load();
-
-        Scene scene = new Scene(root, 1000, 700);
-        primaryStage.setTitle("FiftyPoker - Juego de Cartas");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        GameStage.getInstance();
     }
 
     public static void main(String[] args) {
