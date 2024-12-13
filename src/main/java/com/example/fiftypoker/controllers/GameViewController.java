@@ -163,17 +163,20 @@ public class GameViewController {
 
     private void configureTurnSystem() {
         scheduler.scheduleAtFixedRate(() -> {
-            if (!gameController.isCurrentPlayerHuman() && !gameController.isGameOver()) {
+            if (gameController.isGameOver()) {
+                scheduler.shutdown(); // Detener el scheduler cuando el juego haya terminado
+                return;
+            }
+
+            if (!gameController.isCurrentPlayerHuman()) {
                 try {
                     gameController.playMachineTurn();
                     Platform.runLater(this::updateView);
                 } catch (Exception e) {
                     System.out.println("Error en el sistema de turnos: " + e.getMessage());
                 }
-            } else if (gameController.isGameOver()) {
-                scheduler.shutdown(); // Detener el scheduler cuando el juego haya terminado
             }
-        }, 0, 4, TimeUnit.SECONDS); // Ejecutar cada 4 segundos
+        }, 0, 4, TimeUnit.SECONDS);
     }
 
     public void configureGame(int numberOfMachinePlayers) {
