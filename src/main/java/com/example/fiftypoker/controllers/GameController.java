@@ -111,38 +111,54 @@ public class GameController {
     }
 
     public boolean isCurrentPlayerHuman() {
-        return players.get(currentPlayerIndex).getName().equals("Humano");
+        if (currentPlayerIndex < players.size()) {
+            return players.get(currentPlayerIndex).getName().equals("Humano");
+        } return false;
     }
 
     private void eliminatePlayer(Player player) {
         System.out.println(player.getName() + " ha sido eliminado.");
         players.remove(player);
         deck.addCardsToDeck(player.getHand());
+
+        if (currentPlayerIndex >= players.size()) {
+            currentPlayerIndex = 0;
+        }
+        checkGameOver();
     }
 
     private void checkGameOver() {
         if (players.size() == 1) {
             gameOver = true;
             System.out.println("¡El ganador es " + players.get(0).getName() + "!");
+            currentPlayerIndex = 0;
         }
     }
 
     public void playMachineTurn() {
+        if (gameOver) {
+            return; // No hacer nada si el juego ha terminado
+        }
         Player machinePlayer = players.get(currentPlayerIndex);
         try {
             Thread.sleep(new Random().nextInt(2000) + 2000); // Simula tiempo de respuesta
+            boolean cardPlayed = false;
             for (int i = 0; i < machinePlayer.getHand().size(); i++) {
                 Card card = machinePlayer.getHand().get(i);
                 if (table.getCurrentSum() + card.getValue() <= 50) {
                     playTurn(i);
-                    return;
+                    cardPlayed = true;
+                    break;
                 }
             }
-            eliminatePlayer(machinePlayer);
+            if (!cardPlayed) {
+                eliminatePlayer(machinePlayer);
+            }
         } catch (InterruptedException e) {
             System.out.println("Error en el turno de la máquina: " + e.getMessage());
         }
     }
+
 
 
     public Table getTable() {
