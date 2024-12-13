@@ -37,6 +37,7 @@ public class GameController {
         table.playCard(deck.drawCard());
     }
 
+
     private void dealInitialCards() {
         for (Player player : players) {
             for (int i = 0; i < 4; i++) {
@@ -127,10 +128,6 @@ public class GameController {
     }
 
     public void playMachineTurn() {
-        if (!players.get(currentPlayerIndex).getName().startsWith("Máquina")) {
-            throw new IllegalStateException("No es el turno de un jugador máquina.");
-        }
-
         Player machinePlayer = players.get(currentPlayerIndex);
         try {
             Thread.sleep(new Random().nextInt(2000) + 2000); // Simula tiempo de respuesta
@@ -146,6 +143,7 @@ public class GameController {
             System.out.println("Error en el turno de la máquina: " + e.getMessage());
         }
     }
+
 
     public Table getTable() {
         return table;

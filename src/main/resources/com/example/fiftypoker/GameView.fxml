@@ -4,6 +4,8 @@
 <?import javafx.scene.layout.*?>
 
 
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.fiftypoker.controllers.GameViewController">
 
@@ -38,4 +40,16 @@
     <!-- Cartas del jugador máquina derecha -->
     <VBox fx:id="machineRightBox" spacing="10" alignment="CENTER"
           layoutX="820" layoutY="60" prefHeight="600" />
+    <ComboBox fx:id="machineCountComboBox" layoutX="430" layoutY="600"
+              onAction="#onSelectNumberOfMachines">
+        <items>
+            <FXCollections fx:factory="observableArrayList">
+                <String fx:value="1" />
+                <String fx:value="2" />
+                <String fx:value="3" />
+            </FXCollections>
+        </items>
+    </ComboBox>
+
+
 </AnchorPane>

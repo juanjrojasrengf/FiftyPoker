@@ -3,6 +3,7 @@ package com.example.fiftypoker.controllers;
 import com.example.fiftypoker.models.Card;
 import com.example.fiftypoker.models.Player;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -11,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
+import javafx.event.ActionEvent;
 import java.io.InputStream;
 
 public class GameViewController {
@@ -45,12 +47,16 @@ public class GameViewController {
     private GameController gameController;
 
     @FXML
+    private ComboBox<String> machineCountComboBox;
+
+    @FXML
     private void initialize() {
         // Configurar el controlador del juego con 3 jugadores máquina
-        gameController = new GameController(3);
+        configureGame(0);
+        machineCountComboBox.getItems().clear();
+        machineCountComboBox.getItems().addAll("1", "2", "3");
+        machineCountComboBox.setOnAction(this::onSelectNumberOfMachines);
         setBackgroundAndTableImages();
-        updateView();
-        configureTurnSystem();
     }
 
     private void setBackgroundAndTableImages() {
@@ -155,14 +161,28 @@ public class GameViewController {
             while (!gameController.isGameOver()) {
                 if (!gameController.isCurrentPlayerHuman()) {
                     try {
-                        Thread.sleep(4000); // Simular tiempo de respuesta de la máquina
                         gameController.playMachineTurn();
                         updateView();
+                        Thread.sleep(1000); // Espera para que se vea el cambio de turno
                     } catch (InterruptedException e) {
                         System.out.println("Error en el sistema de turnos: " + e.getMessage());
                     }
                 }
             }
         }).start();
+    }
+
+    public void configureGame(int numberOfMachinePlayers) {
+        gameController = new GameController(numberOfMachinePlayers);
+        updateView();
+        configureTurnSystem();
+    }
+    @FXML
+    private void onSelectNumberOfMachines(ActionEvent event) {
+        String selectedValue = machineCountComboBox.getValue();
+        if (selectedValue != null) {
+            int numberOfMachines = Integer.parseInt(selectedValue);
+            configureGame(numberOfMachines);
+        }
     }
 }
