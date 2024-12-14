@@ -2,6 +2,7 @@ package com.example.fiftypoker.controllers;
 
 import com.example.fiftypoker.models.*;
 import com.example.fiftypoker.view.GameStage;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
@@ -106,6 +107,7 @@ public class GameController {
         if (!gameOver) {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         }
+
     }
 
     /**
@@ -178,7 +180,7 @@ public class GameController {
             gameOver = true;
             System.out.println("¡El ganador es " + players.get(0).getName() + "!");
             currentPlayerIndex = 0;
-            winOrLoseAlert();
+            Platform.runLater(this::winOrLoseAlert);
         }
     }
 
@@ -217,8 +219,15 @@ public class GameController {
      */
     private void winOrLoseAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("¡Felicidades!");
-        alert.setHeaderText("¡El ganador es " + players.get(0).getName() + "!");
+        if(players.get(0).getName().equals("Humano")) {
+            alert.setTitle(null);
+            alert.setHeaderText(null);
+            alert.setContentText("FELICIDADES!,Has ganado!");
+        }else {
+            alert.setTitle(null);
+            alert.setHeaderText(null);
+            alert.setContentText("Mas suerte para la proxima,has perdido!");
+        }
 
         alert.showAndWait();
         try {
