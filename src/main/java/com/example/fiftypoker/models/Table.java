@@ -4,21 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Representa la mesa del juego "Cincuentazo".
+ * Represents the table of "Cincuentazo" game.
  */
 public class Table {
     private Card activeCard; // Última carta jugada en la mesa
     private int currentSum; // Suma actual en la mesa
     private List<Card> playedCards; // Cartas jugadas en la mesa
 
+    /**
+     * Constructs a Table with an empty list of played cards and a current sum of 0.
+     */
     public Table() {
         this.playedCards = new ArrayList<>();
         this.currentSum = 0;
     }
 
     /**
-     * Juega una carta en la mesa y actualiza la suma.
-     * @param card Carta a jugar.
+     * Plays a card on the table and updates the sum.
+     * If the card is an Ace, its value is adjusted to either 1 or 10 based on the current sum.
+     * Throws an IllegalStateException if the new sum exceeds 50.
+     *
+     * @param card the card to play
      */
     public void playCard(Card card) {
         int cardValue = card.getValue();
@@ -35,7 +41,8 @@ public class Table {
     }
 
     /**
-     * Reinicia la mesa conservando solo la última carta jugada.
+     * Resets the table, keeping only the last played card.
+     * The current sum is updated to the value of the last played card.
      */
     public void resetTable() {
         if (!playedCards.isEmpty()) {
@@ -49,8 +56,10 @@ public class Table {
     }
 
     /**
-     * Recolecta todas las cartas jugadas excepto la última.
-     * @return Lista de cartas recolectadas.
+     * Collects all played cards except the last one.
+     * Resets the table and returns the list of collected cards.
+     *
+     * @return a list of collected cards
      */
     public List<Card> collectPlayedCards() {
         List<Card> collectedCards = new ArrayList<>(playedCards);

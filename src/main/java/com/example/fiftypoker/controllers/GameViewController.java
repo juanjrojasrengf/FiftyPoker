@@ -13,6 +13,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +60,13 @@ public class GameViewController {
 
     private ScheduledExecutorService scheduler;
 
+
+
+    /**
+     * Initializes the controller class. This method is automatically called
+     * after the FXML file has been loaded. It sets up the scheduler, configures
+     * the game, and prepares the machine count combo box and other UI elements.
+     */
     @FXML
     private void initialize() {
         scheduler = Executors.newScheduledThreadPool(1); // Inicializar el scheduler aquí
@@ -69,6 +78,12 @@ public class GameViewController {
         handleHelpButton();
     }
 
+    /**
+     * Loads and sets the background, table, and card back images for the game.
+     * This method attempts to load images from the specified resource paths
+     * and assigns them to the corresponding ImageView components.
+     * If an error occurs during loading, it prints an error message to the console.
+     */
     private void setBackgroundAndTableImages() {
         try {
             // Cargar el fondo
@@ -93,6 +108,14 @@ public class GameViewController {
         }
     }
 
+    /**
+     * Handles the event when a card is double-clicked. If the event is a double-click,
+     * it identifies the clicked card and its index, and if it is the human player's turn,
+     * it plays the turn and updates the view. If it is not the human player's turn,
+     * it prints a message to the console.
+     *
+     * @param event the mouse event triggered by double-clicking a card
+     */
     @FXML
     private void onCardDoubleClicked(MouseEvent event) {
         if (event.getClickCount() == 2) {
@@ -107,6 +130,13 @@ public class GameViewController {
         }
     }
 
+    /**
+     * Handles the event when the deck is double-clicked. If the event is a double-click
+     * and it is the human player's turn, it allows the player to take a card from the deck
+     * and updates the view. If it is not the human player's turn, it prints a message to the console.
+     *
+     * @param event the mouse event triggered by double-clicking the deck
+     */
     @FXML
     private void onDeckDoubleClicked(MouseEvent event) {
         if (event.getClickCount() == 2) {
@@ -116,10 +146,14 @@ public class GameViewController {
             } else {
                 System.out.println("No es el turno del jugador humano.");
             }
-
         }
     }
 
+    /**
+     * Updates the game view by refreshing the current table sum, the active card on the table,
+     * the human player's hand, and the machine players' hands. This method retrieves the necessary
+     * data from the game controller and updates the corresponding UI elements.
+     */
     private void updateView() {
         // Actualizar la suma actual en la mesa
         tableSumLabel.setText("Suma actual: " + gameController.getTable().getCurrentSum());
@@ -150,6 +184,14 @@ public class GameViewController {
         updateMachineBox(machineRightBox, 3);
     }
 
+    /**
+     * Updates the specified machine player's card box. This method clears any existing cards
+     * in the machine box and adds the back images of the cards for the specified machine player.
+     * If the player index is out of bounds, it clears the machine box.
+     *
+     * @param machineBox the Pane representing the machine player's card box
+     * @param playerIndex the index of the machine player in the players list
+     */
     private void updateMachineBox(Pane machineBox, int playerIndex) {
         if (playerIndex < gameController.getPlayers().size()) {
             machineBox.getChildren().clear(); // Limpia las cartas existentes
@@ -167,8 +209,16 @@ public class GameViewController {
         }
     }
 
+    /**
+     * Configures the turn system for the game. This method schedules a fixed-rate task
+     * that checks the current player and updates the turn label accordingly. If the game
+     * is over, it shuts down the scheduler. If it is the machine player's turn, it plays
+     * the machine's turn and updates the view.
+     */
     private void configureTurnSystem() {
+        List<Player> playerList = gameController.getPlayers();
         scheduler.scheduleAtFixedRate(() -> {
+            Player currentPlayer = playerList.get(gameController.getCurrentPlayerIndex());
             if (gameController.isGameOver()) {
                 scheduler.shutdown(); // Detener el scheduler cuando el juego haya terminado
                 return;
@@ -176,10 +226,10 @@ public class GameViewController {
 
             // Determina quién tiene el turno
             if (gameController.isCurrentPlayerHuman()) {
-                Platform.runLater(() -> setTurnLabel("Tu turno"));
+                Platform.runLater(() -> setTurnLabel("Turno de Humano"));
             } else {
                 int currentMachinePlayerIndex = gameController.getCurrentPlayerIndex();
-                Platform.runLater(() -> setTurnLabel("Turno de la Máquina " + (currentMachinePlayerIndex)));
+                Platform.runLater(() -> setTurnLabel("Turno de " + currentPlayer.getName()));
             }
 
             if (!gameController.isCurrentPlayerHuman()) {
@@ -193,13 +243,25 @@ public class GameViewController {
         }, 0, 4, TimeUnit.SECONDS);
     }
 
-
+    /**
+     * Configures the game with the specified number of machine players. This method
+     * initializes the game controller, updates the view, and sets up the turn system.
+     *
+     * @param numberOfMachinePlayers the number of machine players to be included in the game
+     */
     public void configureGame(int numberOfMachinePlayers) {
         gameController = new GameController(numberOfMachinePlayers);
         Platform.runLater(this::updateView);
         configureTurnSystem();
     }
 
+    /**
+     * Handles the event when a number of machines is selected from the combo box.
+     * This method retrieves the selected value, parses it to an integer, and configures
+     * the game with the specified number of machine players.
+     *
+     * @param event the action event triggered by selecting a number of machines
+     */
     @FXML
     private void onSelectNumberOfMachines(ActionEvent event) {
         String selectedValue = machineCountComboBox.getValue();
@@ -209,6 +271,11 @@ public class GameViewController {
         }
     }
 
+    /**
+     * Handles the event when the help button is clicked. This method displays an
+     * informational alert with the rules of Fifty Poker, including the objective,
+     * card rules, turn instructions, and game end conditions.
+     */
     @FXML
     private void handleHelpButton() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -240,6 +307,10 @@ public class GameViewController {
         howToPlayAlert();
     }
 
+    /**
+     * Displays an informational alert on how to play Fifty Poker. This method provides
+     * instructions on reviewing the game rules, selecting the number of bots, and playing the game.
+     */
     private void howToPlayAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("¿Como jugar Fifty Poker?");
@@ -254,7 +325,13 @@ public class GameViewController {
         alert.showAndWait();
     }
 
-    public void setTurnLabel(String turn){
+    /**
+     * Sets the turn label with the specified text. This method updates the turn label
+     * to indicate whose turn it is in the game.
+     *
+     * @param turn the text to set in the turn label
+     */
+    public void setTurnLabel(String turn) {
         turnLabel.setText(turn);
     }
 }
