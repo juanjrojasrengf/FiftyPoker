@@ -4,6 +4,7 @@ import com.example.fiftypoker.models.Card;
 import com.example.fiftypoker.models.Player;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -52,6 +53,9 @@ public class GameViewController {
     @FXML
     private ComboBox<String> machineCountComboBox;
 
+    @FXML
+    private Label turnLabel;
+
     private ScheduledExecutorService scheduler;
 
     @FXML
@@ -62,6 +66,7 @@ public class GameViewController {
         machineCountComboBox.getItems().addAll("1", "2", "3");
         machineCountComboBox.setOnAction(this::onSelectNumberOfMachines);
         setBackgroundAndTableImages();
+        handleHelpButton();
     }
 
     private void setBackgroundAndTableImages() {
@@ -111,6 +116,7 @@ public class GameViewController {
             } else {
                 System.out.println("No es el turno del jugador humano.");
             }
+
         }
     }
 
@@ -168,6 +174,14 @@ public class GameViewController {
                 return;
             }
 
+            // Determina quién tiene el turno
+            if (gameController.isCurrentPlayerHuman()) {
+                Platform.runLater(() -> setTurnLabel("Tu turno"));
+            } else {
+                int currentMachinePlayerIndex = gameController.getCurrentPlayerIndex();
+                Platform.runLater(() -> setTurnLabel("Turno de la Máquina " + (currentMachinePlayerIndex)));
+            }
+
             if (!gameController.isCurrentPlayerHuman()) {
                 try {
                     gameController.playMachineTurn();
@@ -178,6 +192,7 @@ public class GameViewController {
             }
         }, 0, 4, TimeUnit.SECONDS);
     }
+
 
     public void configureGame(int numberOfMachinePlayers) {
         gameController = new GameController(numberOfMachinePlayers);
@@ -192,5 +207,54 @@ public class GameViewController {
             int numberOfMachines = Integer.parseInt(selectedValue);
             configureGame(numberOfMachines);
         }
+    }
+
+    @FXML
+    private void handleHelpButton() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Reglas de Fifty Poker");
+        alert.setHeaderText("Reglas de Fifty Poker");
+        alert.setContentText(
+                "El objetivo es ser el último jugador en el juego evitando que la suma de las cartas en la mesa supere 50. Cada jugador (tú y las máquinas) recibe 4 cartas al azar. Una carta se coloca boca arriba en la mesa, y su valor inicial será la suma de la mesa. Las cartas restantes forman el mazo.\n\n" +
+                        "Reglas de las cartas:\n" +
+                        "- 2-8 y 10: Suman su número a la suma de la mesa.\n" +
+                        "- 9: No modifica la suma.\n" +
+                        "- J, Q, K: Restan 10.\n" +
+                        "- A (As): Puede sumar 1 o 10, según lo que más te convenga.\n\n" +
+                        "Turnos:\n" +
+                        "El juego se juega por turnos. En tu turno:\n" +
+                        "- Mira las cartas en tu mano y elige una que puedas jugar sin que la suma supere 50.\n" +
+                        "- Coloca la carta elegida en la mesa. La suma de la mesa se actualiza según el valor de la carta.\n" +
+                        "- Toma una nueva carta del mazo para tener siempre 4 cartas en la mano.\n" +
+                        "- Si no puedes jugar ninguna carta porque todas exceden 50, quedas eliminado.\n\n" +
+                        "Turno de la máquina:\n" +
+                        "Las máquinas también jugarán en su turno siguiendo las mismas reglas.\n\n" +
+                        "Eliminación:\n" +
+                        "Si un jugador (tú o una máquina) no puede jugar ninguna carta sin exceder 50, queda eliminado y sus cartas se agregan al final del mazo.\n\n" +
+                        "Fin del Juego:\n" +
+                        "El juego termina cuando solo queda un jugador. ¡Ese jugador será el ganador!"
+        );
+        alert.getDialogPane().setMinWidth(600);
+        alert.getDialogPane().setMinHeight(300);
+        alert.showAndWait();
+        howToPlayAlert();
+    }
+
+    private void howToPlayAlert() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("¿Como jugar Fifty Poker?");
+        alert.setHeaderText("¿Como jugar Fifty Poker?");
+        alert.setContentText(
+                "¡Para poder jugar Fifty Poker debes revisar primero las reglas del juego!\n\n" +
+                        "Luego de leer las reglas, puedes eligir el Número(#) de bots contra los cuales quieres jugar\n" +
+                        "Al escoger la cantidad de bots contra los cuales quieres jugar, ya podras visualizar la mesa con la suma total de las cartas en juego\n" +
+                        "Para lanzar una carta deberás dar un doble click sobre esta.\n" +
+                        "¡Es hora de ganar!"
+        );
+        alert.showAndWait();
+    }
+
+    public void setTurnLabel(String turn){
+        turnLabel.setText(turn);
     }
 }

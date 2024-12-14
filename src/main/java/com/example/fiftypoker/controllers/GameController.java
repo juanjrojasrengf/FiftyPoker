@@ -172,4 +172,8 @@ public class GameController {
     public boolean isGameOver() {
         return gameOver;
     }
+
+    public int getCurrentPlayerIndex() {
+        return currentPlayerIndex;
+    }
 }
